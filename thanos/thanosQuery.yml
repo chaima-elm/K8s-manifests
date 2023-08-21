@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thanosquery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thanos-query
+  template:
+    metadata:
+      labels:
+        app: thanos-query
+    spec:
+      containers:
+        - name: thanosquery
+          image: thanosio/thanos:master-2020-09-30-e4941a5c
+          ports:
+            - containerPort: 19192
+              protocol: TCP
+          args:
+            - "query"
+            - "--http-address=0.0.0.0:19192"
+            - "--store=thanosSidecar:19090"
+            - "--store=thanosStore:10901"
+
+         

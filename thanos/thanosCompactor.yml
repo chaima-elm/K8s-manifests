@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thanos-compactor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thanos-compactor
+  template:
+    metadata:
+      labels:
+        app: thanos-compactor
+    spec:
+      containers:
+        - name: thanos-compactor
+          image: thanosio/thanos:master-2020-09-30-e4941a5c
+          
+          args:
+            - "compact"
+            - "--objstore.config-file=/etc/thanos/objstore.yml"
+            - "--retention.resolution-raw=365d"
+            - "--retention.resolution-5m=365d"
+            - "--retention.resolution-1h=365d"
+            - "--wait"
+          volumeMounts:
+            - name: thanos-config
+              mountPath: /etc/thanos
+              readOnly: true
+      volumes:
+        - name: thanos-config
+          configMap:
+            name: thanos-configmap

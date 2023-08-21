@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: maria
+spec:
+  serviceName: maria
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: maria
+  template:
+    metadata:
+      labels:
+        app: maria
+    spec:
+      containers:
+        - name: maria
+          image: mariadb:10.2
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          volumeMounts:
+            - name: mysql
+              mountPath: /var/lib/mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: magma
+            - name: MYSQL_DATABASE
+              value: magma_dev
+            - name: MYSQL_USER
+              value: magma_dev
+            - name: MYSQL_PASSWORD
+              value: magma_dev
+            - name: SQL_MODE
+              value: "ANSI_QUOTES"
+            
+          args:
+            - "mysqld"
+            - "--sql_mode=ANSI_QUOTES"
+      volumes:
+        - name: mysql
+          persistentVolumeClaim:
+            claimName: mysql-pvc

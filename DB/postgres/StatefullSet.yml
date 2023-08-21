@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15.3
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              value: magma_dev
+            - name: POSTGRES_PASSWORD
+              value: magma_dev
+            - name: POSTGRES_DB
+              value: magma_dev
+            
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          args:
+            - "postgres"
+            - "-c"
+            - "log_duration=true"
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: pgdata-pvc

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flunted-forward
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flunted-forward
+  template:
+    metadata:
+      labels:
+        app: flunted-forward
+    spec:
+      containers:
+        - name: fluentd-forward
+          image: shamyy/magma:fluentd-forward-image
+          ports: 
+            - containerPort: 24224
+              protocol: UDP
+      restartPolicy: Always
+
+

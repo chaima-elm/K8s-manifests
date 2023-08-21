@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fluentd-daemon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fluentd-daemon
+  template:
+    metadata:
+      labels:
+        app: fluentd-daemon
+    spec:
+      containers:
+        - name: fluentd-daemon
+          image: shamyy/magma:fluentd-daemon-image
+          ports: 
+            - containerPort: 24224
+              protocol: UDP
+      restartPolicy: Always
+
+

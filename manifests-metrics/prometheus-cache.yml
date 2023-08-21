@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-cache
+  template:
+    metadata:
+      labels:
+        app: prometheus-cache
+    spec:
+      containers:
+        - name: prometheus-cache
+          image: facebookincubator/prometheus-edge-hub:1.1.0
+          ports:
+            - containerPort: 9091
+              protocol: TCP
+            - containerPort: 9092
+              protocol: TCP
+          args:
+            - '-limit=500000'
+            - '-grpc-port=9092'
+      restartPolicy: Always
+

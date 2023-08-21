@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.20.1
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+          volumeMounts:
+            - name: prometheus-config-volume
+              mountPath: /etc/prometheus
+              readOnly: true
+          args:
+             - '--storage.tsdb.min-block-duration=2h'
+             - '--storage.tsdb.max-block-duration=2h'
+             - '--config.file=/etc/prometheus/prometheus.yml'
+             - '--storage.tsdb.path=/prometheus'
+             - '--web.enable-lifecycle'
+      restartPolicy: Always
+
+    volumes:
+        - name: prometheus-config-volume
+          configMap:
+            name: prometheus-config-volume
+

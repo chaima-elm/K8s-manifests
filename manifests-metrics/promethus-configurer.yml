@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-configurer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-configurer
+  template:
+    metadata:
+      labels:
+        app: prometheus-configurer
+    spec:
+      containers:
+        - name: prometheus-configurer
+          image: facebookincubator/prometheus-configurer:1.0.0
+          volumeMounts:
+            - name: config-volume
+              mountPath: /tmp/alert_rules
+              #mountPath: /etc/configs
+          args:
+             - '-port=9100'
+             - '-rules-dir=/tmp/alert_rules/'
+             #- '-rules-dir=/etc/configs/alert_rules/'
+             - '-prometheusURL=prometheus:9090'
+             - '-multitenant-label=networkID'
+             - '-restrict-queries'     
+             
+      restartPolicy: Always
+
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config-volume

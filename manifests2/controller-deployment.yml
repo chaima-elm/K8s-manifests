@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: controller
+  template:
+    metadata:
+      labels:
+        app: controller
+    spec:
+      
+      containers:
+        - name: controller
+          image: shamyy/orc8r-controller:orc8r-controller 
+          env:
+            - name: TEST_MODE
+              value: "1"
+            - name: SERVICE_HOSTNAME
+              value: localhost
+            - name: SQL_DRIVER
+              value: postgres
+            - name: DATABASE_SOURCE
+              value: "dbname=magma_dev user=magma_dev password=magma_dev host=postgres-service sslmode=disable"
+            - name: SQL_DIALECT
+              value: psql
+            - name: SERVICE_REGISTRY_MODE
+              value: yaml
+            - name: ORC8R_DOMAIN_NAME
+              value: magma.test
+            - name: VERSION_TAG
+              value: LOCAL-DEV
+            - name: HELM_VERSION_TAG
+              value: LOCAL-DEV
+            - name: MAGMA_PRINT_GRPC_PAYLOAD
+              value: "0"
+          volumeMounts:
+            - name: magma-certs
+              mountPath: /var/opt/magma/certs
+            - name: supervisord-conf
+              mountPath: etc/supervisor/conf.d
+          command:
+            - "/bin/sh"
+            - "-c"
+            - "/usr/local/bin/wait-for-it.sh -s -t 30 postgres-service:5432 && /usr/bin/supervisord"
+          
+      restartPolicy: Always 
+
+      volumes:
+        - name: supervisord-conf
+          configMap:
+            name: controller-supervisord-configs
+ 
+        - name: magma-certs
+          configMap:
+            name: controller-certs
+            

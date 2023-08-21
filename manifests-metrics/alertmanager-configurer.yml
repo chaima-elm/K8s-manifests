@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager-configurer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager-configurer
+  template:
+    metadata:
+      labels:
+        app: alertmanager-configurer
+    spec:
+      containers:
+        - name: alertmanager-configurer
+          image: facebookincubator/alertmanager-configurer:1.0.0
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/configs
+          args:
+             - '-port=9101'
+             - '-alertmanager-conf=/etc/configs/alertmanager.yml'
+             - '-alertmanagerURL=alertmanager:9093'
+             - '-multitenant-label=networkID'
+              
+      restartPolicy: Always
+      
+      volumes:
+        - name: config-volume
+          configMap:
+            name: alertmanager-config-volume

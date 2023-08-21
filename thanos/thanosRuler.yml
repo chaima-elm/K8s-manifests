@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thanos-ruler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thanos-ruler
+  template:
+    metadata:
+      labels:
+        app: thanos-ruler
+    spec:
+      containers:
+        - name: thanos-ruler
+          image: thanosio/thanos:master-2020-09-30-e4941a5c 
+          ports:
+            - containerPort: 10903
+              protocol: TCP
+            - containerPort: 10902
+              protocol: TCP
+          args:
+            - "rule"
+            - "--eval-interval=30s"
+            - "--rule-file=/etc/configs/alert_rules/*"
+            - "--alertmanagers.url=http://alertmanager:9093"
+            - "--query=http://thanosQuery:19192"
+            - "--objstore.config-file=/etc/thanos/objstore.yml"
+          volumeMounts:
+            - name: thanos-config
+              mountPath: /etc/thanos
+              readOnly: true
+            - name: alert-rules
+              mountPath: /etc/configs/alert_rules
+              readOnly: true
+
+      volumes:
+        - name: thanos-config
+          configMap:
+            name: thanos-configmap
+        - name: alert-rules
+          hostPath:
+              path: /etc/configs/alert_rules
+
+
+
+
+
+

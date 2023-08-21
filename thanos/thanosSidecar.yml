@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: thanos-sidecar-service
+spec:
+  selector:
+    app: thanos-sidecar
+  ports:
+    - protocol: TCP
+      port: 19090
+      targetPort: 19090
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thanosidecar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thanos-sidecar
+  template:
+    metadata:
+      labels:
+        app: thanos-sidecar
+    spec:
+      containers:
+        - name: thanosidecar
+          image: thanosio/thanos:v0.31.0
+          args:
+
+            - 'sidecar'
+            - '--tsdb.path=/prometheus'
+            - '--prometheus.url=http://thanos-sidecar-service:9090'
+            - '--grpc-address=0.0.0.0:19090'
+            - '--objstore.config-file=/etc/thanos/objstore.yml'
+          volumeMounts:
+            - name: prometheus-data
+              mountPath: /prometheus
+            - name: objstore-data
+              mountPath: /objstorage
+              readOnly: true
+            - name: thanos-config
+              mountPath: /etc/thanos
+              readOnly: true
+
+      restartPolicy: Always
+      volumes:
+        - name: prometheus-data
+          hostPath:
+            path: /home/shamy/prometheus-data
+        - name: objstore-data
+          hostPath:
+            path: /home/shamy/prometheus_objstore_data
+        - name: thanos-config
+          configMap:
+            name: thanos-configmap

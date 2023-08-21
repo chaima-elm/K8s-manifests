@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      hostAliases:                  
+        - ip: "10.103.240.97"
+          hostnames:
+            - "controller.magma.test"
+            
+      containers:
+        - name: nginx
+          image: shamyy/magma:orc8r-nginx2
+          env:
+            - name: CONTROLLER_HOSTNAME
+              value: controller.magma.test
+            - name: PROXY_BACKENDS
+              value: controller-svc
+            - name: TEST_MODE
+              value: "1"
+            - name: RESOLVER
+              value: "127.0.0.11"
+            - name: SERVICE_REGISTRY_MODE
+              value: k8s
+            - name: SSL_CERTIFICATE
+              value: "/var/opt/magma/certs/controller.crt"
+            - name: SSL_CERTIFICATE_KEY
+              value: "/var/opt/magma/certs/controller.key"
+            - name: SSL_CLIENT_CERTIFICATE
+              value: "/var/opt/magma/certs/certifier.pem"
+          ports:
+            - containerPort: 7443
+              protocol: TCP
+            - containerPort: 7444
+              protocol: TCP
+            - containerPort: 9443
+              protocol: TCP
+          
+          volumeMounts:
+            - name: magma-certs
+              mountPath: /app/magma/certs
+     
+      volumes:
+        - name: magma-certs
+          hostPath:
+            path: /var/opt/magma/certs
+   
+      restartPolicy: Always
