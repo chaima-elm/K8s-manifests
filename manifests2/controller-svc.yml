@@ -4,7 +4,7 @@ metadata:
   name: controller-svc
 spec:
   selector:
-    app: ngi
+    app: controller
   
   ports:
 

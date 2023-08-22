@@ -12,10 +12,10 @@ spec:
       labels:
         app: nginx
     spec:
-      hostAliases:                  
-        - ip: "10.103.240.97"
-          hostnames:
-            - "controller.magma.test"
+     # hostAliases:                  
+        #- ip: "10.103.240.97"
+       #   hostnames:
+         #   - "controller.magma.test"
             
       containers:
         - name: nginx
